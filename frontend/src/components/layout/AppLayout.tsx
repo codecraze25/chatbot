@@ -1,27 +1,25 @@
-import AddIcon from '@mui/icons-material/Add'
 import {
   AppBar,
   Box,
-  Button,
   Chip,
   Drawer,
   Toolbar,
   Typography,
 } from '@mui/material'
 
-const DRAWER_WIDTH = 240
+const DRAWER_WIDTH = 260
 
 interface AppLayoutProps {
   provider?: string
   model?: string
-  onNewChat?: () => void
+  sidebar: React.ReactNode
   children: React.ReactNode
 }
 
 export default function AppLayout({
   provider,
   model,
-  onNewChat,
+  sidebar,
   children,
 }: AppLayoutProps) {
   return (
@@ -54,19 +52,12 @@ export default function AppLayout({
             width: DRAWER_WIDTH,
             boxSizing: 'border-box',
             mt: 8,
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       >
-        <Box sx={{ p: 2 }}>
-          <Button
-            variant="outlined"
-            fullWidth
-            startIcon={<AddIcon />}
-            onClick={onNewChat}
-          >
-            New chat
-          </Button>
-        </Box>
+        {sidebar}
       </Drawer>
 
       <Box

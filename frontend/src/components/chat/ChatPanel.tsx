@@ -10,15 +10,9 @@ import MessageList from './MessageList'
 
 interface ChatPanelProps {
   conversationId: string | null
-  initialMessage?: string | null
-  onInitialMessageSent?: () => void
 }
 
-export default function ChatPanel({
-  conversationId,
-  initialMessage,
-  onInitialMessageSent,
-}: ChatPanelProps) {
+export default function ChatPanel({ conversationId }: ChatPanelProps) {
   const [optimisticMessage, setOptimisticMessage] = useState<Message | null>(null)
 
   const {
@@ -59,13 +53,6 @@ export default function ChatPanel({
       setOptimisticMessage(null)
     }
   }, [conversation?.messages, isStreaming, optimisticMessage, streamError])
-
-  useEffect(() => {
-    if (!initialMessage || !conversationId || isStreaming) return
-    onInitialMessageSent?.()
-    void handleSend(initialMessage)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialMessage, conversationId])
 
   const serverMessages =
     conversation?.messages.filter((m) => m.role !== 'system') ?? []
