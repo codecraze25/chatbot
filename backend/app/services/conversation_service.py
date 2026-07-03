@@ -53,6 +53,7 @@ def add_message(
     return message
 
 
-def auto_title_from_message(conversation: Conversation, message: str) -> None:
+def auto_title_from_message(db: Session, conversation: Conversation, message: str) -> None:
     if conversation.title == "New chat":
         conversation.title = message[:50].strip() or "New chat"
+        db.commit()
