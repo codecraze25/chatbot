@@ -1,11 +1,15 @@
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
 import {
   AppBar,
   Box,
   Chip,
   Drawer,
+  IconButton,
   Toolbar,
   Typography,
 } from '@mui/material'
+import { useColorMode } from '../../theme/ColorModeContext'
 
 const DRAWER_WIDTH = 260
 
@@ -22,6 +26,8 @@ export default function AppLayout({
   sidebar,
   children,
 }: AppLayoutProps) {
+  const { mode, toggleColorMode } = useColorMode()
+
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <AppBar
@@ -36,10 +42,13 @@ export default function AppLayout({
             <Chip
               label={`${provider} / ${model}`}
               size="small"
-              sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}
+              sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', mr: 1 }}
               variant="outlined"
             />
           )}
+          <IconButton color="inherit" onClick={toggleColorMode} aria-label="Toggle theme">
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
         </Toolbar>
       </AppBar>
 

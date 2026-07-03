@@ -1,6 +1,6 @@
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ from app.schemas import ChatRequest, MessageRole
 from app.services import conversation_service
 from app.services.ai import get_ai_provider
 from app.services.ai.base import ChatMessage
+from app.utils.rate_limit import check_rate_limit
 from app.utils.sse import format_sse
 
 router = APIRouter(tags=["chat"])
@@ -72,8 +73,11 @@ async def chat_stream(
 async def send_message(
     conversation_id: str,
     body: ChatRequest,
+    request: Request,
     db: Session = Depends(get_db),
 ):
+    check_rate_limit(request)
+
     conversation = conversation_service.get_conversation(db, conversation_id)
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
