@@ -1,42 +1,51 @@
-import { useQuery } from '@tanstack/react-query'
-import { Box, CircularProgress, Typography } from '@mui/material'
-import AppLayout from './components/layout/AppLayout'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getHealth } from './api/client'
+import { createConversation } from './api/conversations'
+import ChatPanel from './components/chat/ChatPanel'
+import AppLayout from './components/layout/AppLayout'
 
 function App() {
-  const { data: health, isLoading, error } = useQuery({
+  const [conversationId, setConversationId] = useState<string | null>(null)
+  const [initialMessage, setInitialMessage] = useState<string | null>(null)
+  const initialized = useRef(false)
+
+  const { data: health } = useQuery({
     queryKey: ['health'],
     queryFn: getHealth,
+    retry: 1,
   })
+
+  const createMutation = useMutation({
+    mutationFn: () => createConversation(),
+    onSuccess: (conv) => {
+      setConversationId(conv.id)
+    },
+  })
+
+  useEffect(() => {
+    if (health && !initialized.current) {
+      initialized.current = true
+      createMutation.mutate()
+    }
+  }, [health, createMutation])
+
+  const handleNewChat = useCallback(() => {
+    setInitialMessage(null)
+    createMutation.mutate()
+  }, [createMutation])
 
   return (
     <AppLayout
       provider={health?.provider}
       model={health?.model}
-      onNewChat={() => console.log('New chat — coming in Step 5')}
+      onNewChat={handleNewChat}
     >
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          gap: 2,
-        }}
-      >
-        {isLoading && <CircularProgress />}
-        {error && (
-          <Typography color="error">
-            Backend unavailable — start the API on port 8000
-          </Typography>
-        )}
-        {health && (
-          <Typography color="text.secondary">
-            Connected to {health.provider} ({health.model})
-          </Typography>
-        )}
-      </Box>
+      <ChatPanel
+        conversationId={conversationId}
+        initialMessage={initialMessage}
+        onInitialMessageSent={() => setInitialMessage(null)}
+      />
     </AppLayout>
   )
 }
